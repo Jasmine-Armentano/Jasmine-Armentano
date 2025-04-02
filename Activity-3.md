@@ -1,70 +1,133 @@
 using System;
+using System.Linq;
 
 class Program
 {
     static void Main()
     {
-        int[] grades = { 75, 60, 78, 90, 77,
-                         90, 82, 89, 82, 97,
-                         90, 91, 78, 81, 88 };
+        const int Students = 5;
+        const int Subjects = 3;
 
-        Console.WriteLine("Grades:");
-        DisplayGrades(grades);
+        int[] grades = { 75, 60, 78, 
+                         90, 77, 90,
+                         82, 89, 82, 
+                         97, 90, 91,
+                         78, 81, 88 };
+
+        Console.WriteLine("Student Grades:");
+        DisplayGrades(grades, Students, Subjects);
 
         Console.WriteLine("\nGrade for Each Student:");
-        DisplayStudentAverages(grades);
+        DisplayStudentAverages(grades, Students, Subjects);
 
         Console.WriteLine("\nHighest Grade for Each Subject:");
-        DisplayHighestGrades(grades);
+        DisplayHighestGrades(grades, Students, Subjects);
+
+        Console.WriteLine("\nLowest Grade for Each Subject:");
+        DisplayLowestGrades(grades, Students, Subjects);
+
+        Console.WriteLine("\nMedian Grade for Each Subject:");
+        DisplayMedianGrades(grades, Students, Subjects);
 
         Console.WriteLine("\nHonor Students:");
-        DisplayHonorStudents(grades);
+        DisplayHonorStudents(grades, Students, Subjects);
     }
 
-    static void DisplayGrades(int[] grades)
+    static void DisplayGrades(int[] grades, int students, int subjects)
     {
-        for (int i = 0; i < grades.Length; i++)
+        for (int i = 0; i < students; i++)
         {
-            Console.Write(grades[i] + " ");
-            if ((i + 1) % 3 == 0) Console.WriteLine();
+            for (int j = 0; j < subjects; j++)
+            {
+                Console.Write(grades[i * subjects + j] + "\t");
+            }
+            Console.WriteLine();
         }
     }
 
-    static void DisplayStudentAverages(int[] grades)
+    static void DisplayStudentAverages(int[] grades, int students, int subjects)
     {
-        for (int i = 0; i < grades.Length; i += 3)
+        for (int i = 0; i < students; i++)
         {
-            int sum = grades[i] + grades[i + 1] + grades[i + 2];
-            int average = sum / 3;
+            int sum = 0;
+            for (int j = 0; j < subjects; j++)
+            {
+                sum += grades[i * subjects + j];
+            }
+            int average = sum / subjects;
             double norsuGrade = ConvertToNorsuGrade(average);
             string status = (norsuGrade <= 3.0) ? "Passed" : "Failed";
-            Console.WriteLine($"Student {(i / 3) + 1}: Average = {average}, NORSU Grade = {norsuGrade}, Status: {status}");
+            Console.WriteLine($"Student {i + 1}: Average = {average}, NORSU Grade = {norsuGrade}, Status: {status}");
         }
     }
 
-    static void DisplayHighestGrades(int[] grades)
+    static void DisplayHighestGrades(int[] grades, int students, int subjects)
     {
-        for (int j = 0; j < 3; j++)
+        for (int j = 0; j < subjects; j++)
         {
             int highest = grades[j];
-            for (int i = j; i < grades.Length; i += 3)
+            for (int i = 1; i < students; i++)
             {
-                if (grades[i] > highest) highest = grades[i];
+                if (grades[i * subjects + j] > highest)
+                {
+                    highest = grades[i * subjects + j];
+                }
             }
             Console.WriteLine($"Subject {j + 1}: {highest}");
         }
     }
 
-    static void DisplayHonorStudents(int[] grades)
+    static void DisplayLowestGrades(int[] grades, int students, int subjects)
     {
-        for (int i = 0; i < grades.Length; i += 3)
+        for (int j = 0; j < subjects; j++)
         {
-            int sum = grades[i] + grades[i + 1] + grades[i + 2];
-            int average = sum / 3;
+            int lowest = grades[j];
+            for (int i = 1; i < students; i++)
+            {
+                if (grades[i * subjects + j] < lowest)
+                {
+                    lowest = grades[i * subjects + j];
+                }
+            }
+            Console.WriteLine($"Subject {j + 1}: {lowest}");
+        }
+    }
+
+    static void DisplayMedianGrades(int[] grades, int students, int subjects)
+    {
+        for (int j = 0; j < subjects; j++)
+        {
+            int[] subjectGrades = new int[students];
+            for (int i = 0; i < students; i++)
+            {
+                subjectGrades[i] = grades[i * subjects + j];
+            }
+            Array.Sort(subjectGrades);
+            double median;
+            int mid = students / 2;
+            if (students % 2 == 0)
+                median = (subjectGrades[mid - 1] + subjectGrades[mid]) / 2.0;
+            else
+                median = subjectGrades[mid];
+
+            Console.WriteLine($"Subject {j + 1}: {median}");
+        }
+    }
+
+    static void DisplayHonorStudents(int[] grades, int students, int subjects)
+    {
+        for (int i = 0; i < students; i++)
+        {
+            int sum = 0;
+            for (int j = 0; j < subjects; j++)
+            {
+                sum += grades[i * subjects + j];
+            }
+            int average = sum / subjects;
             double norsuGrade = ConvertToNorsuGrade(average);
             if (norsuGrade <= 1.75)
             {
-                Console.WriteLine($"Student {(i / 3) + 1}: Average = {average}, NORSU Grade = {norsuGrade}, Status: Honor Student");
+                Console.WriteLine($"Student {i + 1}: Average = {average}, NORSU Grade = {norsuGrade}, Status: Honor Student");
             }
         }
     }
